@@ -1,0 +1,418 @@
+# Auto detect text files and perform LF normalization
+*<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizons Fly Experience | Your Trusted Travel & Visa Consultant</title>
+    <style>
+        /* Modern CSS Reset & Variable Setup */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #0f2b48;
+            --accent: #d4af37;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --overlay: rgba(0, 0, 0, 0.6);
+        }
+
+        body, html {
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            color: var(--text-light);
+        }
+
+        /* Background Scrolling Slider Setup */
+        .bg-slider {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        /* Subtle dark overlay to ensure text readability */
+        .bg-slider::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.75));
+        }
+
+        /* Main Container Layout */
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            justify-content: space-between;
+            padding: 2rem 4rem;
+        }
+
+        /* Header / Brand Area */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-light);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        /* Dynamic Showcase Area */
+        .showcase {
+            max-width: 800px;
+            margin-top: -2rem;
+        }
+
+        .tagline {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Dynamic Content Panel for Interactive Tabs */
+        .content-panel {
+            background: rgba(15, 43, 72, 0.85);
+            border-left: 5px solid var(--accent);
+            padding: 2rem;
+            border-radius: 4px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            animation: slideUp 0.4s ease-out forwards;
+        }
+
+        .content-panel.active-panel {
+            display: block;
+        }
+
+        .content-panel h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .content-panel p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        .services-list {
+            list-style: none;
+        }
+
+        .services-list li {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .services-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .contact-details {
+            font-style: normal;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        /* Footer & Quick Links System */
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 1.5rem;
+        }
+
+        .footer-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quick-links-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0.3rem 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            color: var(--text-light);
+        }
+
+        .nav-btn::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-btn:hover::after, .nav-btn.active::after {
+            width: 100%;
+        }
+
+        .slogan-container {
+            text-align: right;
+            max-width: 450px;
+        }
+
+        .premium-slogan {
+            font-size: 1.3rem;
+            font-style: italic;
+            color: #f0f0f0;
+            font-weight: 300;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1rem;
+        }
+
+        .copyright-block {
+            line-height: 1.5;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Modifications */
+        @media (max-width: 768px) {
+            .main-wrapper {
+                padding: 1.5rem;
+                overflow-y: auto;
+            }
+            .tagline {
+                font-size: 2.2rem;
+                margin-top: 2rem;
+            }
+            .footer-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+            .slogan-container {
+                text-align: left;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Premium Auto-Scrolling Background Framework -->
+    <div class="bg-slider">
+        <!-- Slide 1: Premium Flight View -->
+        <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1920&q=80');"></div>
+        <!-- Slide 2: Traveling Adventure / Scenic Steps Pathway -->
+        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80');"></div>
+        <!-- Slide 3: Beautiful Traveling Pictures Structure -->
+        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80');"></div>
+    </div>
+
+    <!-- Main Dynamic Layout Interface -->
+    <div class="main-wrapper">
+        
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <h1>HORIZONS FLY<span> EXPERIENCE</span></h1>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Engine Showcase -->
+        <div class="showcase">
+            <!-- Permanent High-Converting Homepage Tagline -->
+            <h2 class="tagline">Explore Beyond Horizons with Confidence</h2>
+            
+            <!-- Tab Element: Home (Welcome Message Displayed Initially) -->
+            <div id="home-panel" class="content-panel active-panel">
+                <h3>Welcome to Luxury Travel</h3>
+                <p>Discover personalized travel planning designed around your aspirations. Select an option below to learn more about our premium travel services, visa consultation capabilities, and customized destinations.</p>
+            </div>
+
+            <!-- Tab Element: About Us Content -->
+            <div id="about-panel" class="content-panel">
+                <h3>About Us</h3>
+                <p>Horizons Fly Experience is committed to providing reliable travel, visa assistance, flight bookings, hotel reservations, and customized tour solutions to make every journey seamless and memorable</p>
+            </div>
+
+            <!-- Tab Element: Services Content -->
+            <div id="services-panel" class="content-panel">
+                <h3>Our Services</h3>
+                <ul class="services-list">
+                    <li>International & Domestic Flight Booking</li>
+                    <li>Visa Assistance</li>
+                    <li>Hotel Reservations</li>
+                    <li>Tour Packages</li>
+                    <li>Travel Insurance</li>
+                    <li>Passport Assistance</li>
+                </ul>
+            </div>
+
+            <!-- Tab Element: Contact Us Footer Content Component -->
+            <div id="contact-panel" class="content-panel">
+                <h3>Contact Us</h3>
+                <div class="contact-details">
+                    <strong>Horizons Fly Experience</strong><br>
+                    Your Trusted Travel & Visa Consultant<br>
+                    📍 80 Feet Buddha Lawn, Near Sakya Muni College, Bodh Gaya, Bihar, India<br>
+                    📧 horizonflyexperience@gmail.com<br>
+                    📞 +91 7209839909
+                </div>
+            </div>
+        </div>
+
+        <!-- System Footer Setup -->
+        <footer>
+            <div class="footer-top">
+                <!-- Left: Quick Links Management Module -->
+                <div class="quick-links-container">
+                    <span class="quick-links-title">Quick Links</span>
+                    <div class="nav-buttons">
+                        <button class="nav-btn active" onclick="switchTab('home-panel', this)">Home</button>
+                        <button class="nav-btn" onclick="switchTab('about-panel', this)">About Us</button>
+                        <button class="nav-btn" onclick="switchTab('services-panel', this)">Services</button>
+                        <button class="nav-btn" onclick="switchTab('contact-panel', this)">Contact Us</button>
+                    </div>
+                </div>
+
+                <!-- Right: Premium Footer Slogan View -->
+                <div class="slogan-container">
+                    <p class="premium-slogan">"Connecting You to the World, One Journey at a Time."</p>
+                </div>
+            </div>
+
+            <!-- Bottom: Static Global Structural Data -->
+            <div class="footer-bottom">
+                <div class="copyright-block">
+                    Copyright © 2026 Horizons Fly Experience. All Rights Reserved.
+                </div>
+                <div>
+                    Designed for Exceptional Travel Experiences
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Controls Engine for Automatic Slide Shifts & Content Tabs Interactivity -->
+    <script>
+        // Background Slider Logic Module
+        const slides = document.querySelectorAll('.slide');
+        let currentSlideIndex = 0;
+
+        function runBackgroundCarousel() {
+            slides[currentSlideIndex].classList.remove('active');
+            currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+            slides[currentSlideIndex].classList.add('active');
+        }
+        // Change slide image every 5 seconds sequentially
+        setInterval(runBackgroundCarousel, 5000);
+
+        // Content Tab Switching Logic Engine
+        function switchTab(panelId, eventTarget) {
+            // Hide all active content data structures
+            const panels = document.querySelectorAll('.content-panel');
+            panels.forEach(panel => panel.classList.remove('active-panel'));
+
+            // Remove active focus styles from quick link buttons
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Activate target elements instantly without structural change
+            document.getElementById(panelId).classList.add('active-panel');
+            eventTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>
